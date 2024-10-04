@@ -43,7 +43,7 @@ Assign ip to router
 ```bash
 ip netns exec router ip addr add 192.168.10.1/24 dev veth-router
 ```                                
-Getthe link up and running
+Get the link up and running
 ```bash
 ip netns exec router ip link set veth-router up
 ```
@@ -65,9 +65,10 @@ Enable IP forwarding on the router, allowing it to route packets between the cli
 ip netns exec router sysctl -w net.ipv4.ip_forward=1
 ```
 ### Set up NAT on the router: 
+Sets up a NAT rule in the router namespace that will perform IP Masquerade on packets leaving the veth2 namespace. "router" namespace is responsible for routing and NAT between different network segments or virtual networks.
 Configure NAT on the router, allowing the client to access the simulated public network through the router's public IP.
 ```bash
-ip netns exec router iptables -t nat -A POSTROUTING -o veth3 -j MASQUERADE
+ip netns exec router iptables -t nat -A POSTROUTING -o veth-router -j MASQUERADE
 ```
 ## TASK3:
 ### Host a simple web server (using Python) on the LAN client: 
