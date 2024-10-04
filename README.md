@@ -6,8 +6,8 @@
       - The topology should look like this: |Client| <--------> |Router (NAT)| <--------> |Internet (Simulated Public Network)|
 2. Implement NAT using Linux network namespaces and iptables to allow the private network (LAN) to access the simulated internet through the router's public IP.
 3. [Bonus] Configure Port Forwarding:
-      ○ Host a simple web server (using Python, Apache, etc.) on the LAN client.
-      ○ Forward requests from the "internet" to the internal web server using the router's public IP.
+      - Host a simple web server (using Python, Apache, etc.) on the LAN client.
+      - Forward requests from the "internet" to the internal web server using the router's public IP.
 4. [Bonus] Restrict outbound traffic from the LAN to allow only HTTP and HTTPS connections.  <br>
 ## TASK1:  
 Topology: | Client (192.168.10.2/24) | <--------> | Router (NAT) (192.168.10.1/24) | <--------> | Internet (Simulated Public Network) (203.0.113.1/24) |
