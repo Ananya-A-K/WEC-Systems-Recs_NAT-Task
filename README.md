@@ -1,5 +1,5 @@
-#### Simple-NAT-implementation
-### Tasks completed:
+# Simple-NAT-implementation
+## Tasks completed:
 1. Create a network topology consisting of:
       - Private LAN (192.168.10.0/24): At least one client node.
       -  Router: Acts as the NAT gateway with an external public IP.
@@ -9,26 +9,26 @@
       ○ Host a simple web server (using Python, Apache, etc.) on the LAN client.
       ○ Forward requests from the "internet" to the internal web server using the router's public IP.
 4. [Bonus] Restrict outbound traffic from the LAN to allow only HTTP and HTTPS connections.  <br>
-### TASK1:  
+## TASK1:  
 Topology: | Client (192.168.10.2/24) | <--------> | Router (NAT) (192.168.10.1/24) | <--------> | Internet (Simulated Public Network) (203.0.113.1/24) |
-# Create Network Namespaces:
+### Create Network Namespaces:
 Create a namespace named client and then another named router
 ```bash
 ip netns add client 
 ip netns add router
 ```
-# Create Virtual Ethernet Pairs:                                                                                              
+### Create Virtual Ethernet Pairs:                                                                                              
 Create link or a virtual cable and name the ends as veth-client and veth-router
 ```bash
 ip link add veth-client type veth peer name veth-router
 ```
-# Assign Interfaces to Namespaces:                                                                                  
+### Assign Interfaces to Namespaces:                                                                                  
 Assign each end of link or virtual cable to the specific namespace
 ```bash
 ip link set veth-client netns client                                                                             
 ip link set veth-router netns router
 ```
-# Assign IP Addresses:                                                                                                         
+### Assign IP Addresses:                                                                                                         
 For the client:                                                                                                                     
 Assign ip to client 
 ```bash
@@ -48,7 +48,7 @@ Getthe link up and running
 ip netns exec router ip link set veth-router up
 ```
 [for loopback: ip netns exec ns1 ip link set lo up]
-# Create a Simulated Public Network:
+### Create a Simulated Public Network:
 Create a virtual cable or link with ends veth-public and veth-router-public(link with router), asign ip and get it up and running
 ```bash
 ip link add veth-public type veth peer name veth-router-public
@@ -58,30 +58,30 @@ ip netns exec router ip addr add 203.0.113.1/24 dev veth-router-public
 ip netns exec router ip link set veth-router-public up
 ```
 (multicast address: 203.0.113.1/24 is used to simulate public internet)
-### TASK2:
-# Enable IP Forwarding: 
+## TASK2:
+### Enable IP Forwarding: 
 Enable IP forwarding on the router, allowing it to route packets between the client and the simulated public network.
 ```bash
 ip netns exec router sysctl -w net.ipv4.ip_forward=1
 ```
-# Set up NAT on the router: 
+### Set up NAT on the router: 
 Configure NAT on the router, allowing the client to access the simulated public network through the router's public IP.
 ```bash
 ip netns exec router iptables -t nat -A POSTROUTING -o veth3 -j MASQUERADE
 ```
-### TASK3:
-# Host a simple web server (using Python) on the LAN client: 
+## TASK3:
+### Host a simple web server (using Python) on the LAN client: 
 Web server is hosted using python's default http server
 ```bash
 ip netns exec client python3 -m http.server 80
 ```
-# Forward requests to the web server
+### Forward requests to the web server
 ```bash
 ip netns exec router iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT –to-destination 192.168.10.2:80
 ip netns exec router iptables -A FORWARD -p tcp -d 192.168.10.2 --dport 80 -j ACCEPT
 ```
-### TASK4:
-# Allow only HTTP(port 80) and HTTPS(port 443) traffic
+## TASK4:
+### Allow only HTTP(port 80) and HTTPS(port 443) traffic
 ```bash
 ip netns exec router iptables -A FORWARD -p tcp --dport 80 -j ACCEPT
 ip netns exec router iptables -A FORWARD -p tcp --dport 443 -j ACCEPT
