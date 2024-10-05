@@ -73,17 +73,19 @@ ip netns exec router iptables -t nat -A POSTROUTING -o veth-router -j MASQUERADE
 ## TASK3:
 ### Host a simple web server (using Python) on the LAN client: 
 Web server is hosted using python's default http server
+Starts a simple web server using Python's built-in http.server module, listening at port 80, which is the default HTTP port.
 ```bash
 ip netns exec client python3 -m http.server 80
 ```
 ### Forward requests to the web server
-```bash
+```bash -i veth1
 ip netns exec router iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT –to-destination 192.168.10.2:80
-ip netns exec router iptables -A FORWARD -p tcp -d 192.168.10.2 --dport 80 -j ACCEPT
+//ip netns exec router iptables -A FORWARD -p tcp -d 192.168.10.2 --dport 80 -j ACCEPT
 ```
 ## TASK4:
 ### Allow only HTTP(port 80) and HTTPS(port 443) traffic
 ```bash
+ip netns exec router -N OUTBOUND
 ip netns exec router iptables -A FORWARD -p tcp --dport 80 -j ACCEPT
 ip netns exec router iptables -A FORWARD -p tcp --dport 443 -j ACCEPT
 ip netns exec router iptables -A FORWARD -j DROP
