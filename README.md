@@ -10,7 +10,7 @@
       - Forward requests from the "internet" to the internal web server using the router's public IP.
 4. [Bonus] Restrict outbound traffic from the LAN to allow only HTTP and HTTPS connections.  <br>
 ## TASK1:  
-Topology: | Client (192.168.10.2/24) | <--------> | Router (NAT) (192.168.10.1/24) | <--------> | Internet (Simulated Public Network) (203.0.113.1/24) |
+Topology: | Client (192.168.10.2/24) | <--------> | Router (NAT) (192.168.10.1/24) | <--------> | Internet (Simulated Public Network)|
 ### Create Network Namespaces:
 Create a namespace named client and then another named router
 ```bash
@@ -52,10 +52,10 @@ ip netns exec router ip link set veth-router up
 Create a virtual cable or link with ends veth-public and veth-router-public(link with router), asign ip and get it up and running
 ```bash
 ip link add veth-public type veth peer name veth-router-public
-ip link set veth-public up
 ip link set veth-router-public netns router
 ip netns exec router ip addr add 203.0.113.1/24 dev veth-router-public
 ip netns exec router ip link set veth-router-public up
+ip link set veth-public up
 ```
 (multicast address: 203.0.113.1/24 is used to simulate public internet)
 ## TASK2:
@@ -65,11 +65,18 @@ Enable IP forwarding on the router, allowing it to route packets between the cli
 ip netns exec router sysctl -w net.ipv4.ip_forward=1
 ```
 ### Set up NAT on the router: 
-Sets up a NAT rule in the router namespace that will perform IP Masquerade on packets leaving the veth2 namespace. "router" namespace is responsible for routing and NAT between different network segments or virtual networks.
-Configure NAT on the router, allowing the client to access the simulated public network through the router's public IP.
+Sets up a NAT rule in the router namespace that will perform IP Masquerade on packets leaving the router namespace, allowing the client to access the simulated public network through the router's public IP.
 ```bash
-ip netns exec router iptables -t nat -A POSTROUTING -o veth-router -j MASQUERADE
+ip netns exec router iptables -t nat -A POSTROUTING -o veth-router-public -j MASQUERADE
 ```
+<!--NAT for incoming traffic to reach the right namespace
+```bash
+ip netns exec router iptables -t nat -A PREROUTING -i veth-router-public -j ACCEPT
+```
+```bash
+ip netns exec router iptables -A FORWARD -d 192.168.10.2 -j ACCEPT
+```
+-->
 ## TASK3:
 ### Host a simple web server (using Python) on the LAN client: 
 Web server is hosted using python's default http server
@@ -79,13 +86,15 @@ ip netns exec client python3 -m http.server 80
 ```
 ### Forward requests to the web server
 ```bash -i veth1
-ip netns exec router iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT –to-destination 192.168.10.2:80
-//ip netns exec router iptables -A FORWARD -p tcp -d 192.168.10.2 --dport 80 -j ACCEPT
+ip netns exec router iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT –d 192.168.10.2:80
+```
+Forwarding all types of traffic
+```bash
+ip netns exec router iptables -A FORWARD -d 192.168.10.2:80 -j ACCEPT
 ```
 ## TASK4:
 ### Allow only HTTP(port 80) and HTTPS(port 443) traffic
 ```bash
-ip netns exec router -N OUTBOUND
 ip netns exec router iptables -A FORWARD -p tcp --dport 80 -j ACCEPT
 ip netns exec router iptables -A FORWARD -p tcp --dport 443 -j ACCEPT
 ip netns exec router iptables -A FORWARD -j DROP
