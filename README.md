@@ -103,7 +103,16 @@ ip netns exec internet ip link set lo up
 **(Note: It may give error saying veth-internt device not found sometimes.. I'm still figuring out why. The subsequent commands do run as the link exists but not up and running)** 
 <br>
 Note: 192.0.2.1/24 and 198.51.100.0/24 are used as public ip for the router as it belongs to the group of ips reserved for documentaion and testig purposes, to avoid confilcts or issues if actual/valid public ips. Alternatively, 198.18.0.0/15 block can be used for the same purpose.
-Also, the private ip of the "internet" router is 192.168.10.1/24
+Also, the private ip of the "internet" router is 192.168.10.1/24<br>
+### Route traffic from client to intenet through the router: 
+Add a route in the client namespace to reach the internet via the router
+```bash
+ip netns exec client ip route add 192.0.2.0/24 via 192.168.10.1
+```
+Check if the route is in the client namespace
+```bash
+ip netns exec client ip route
+```
 ## TASK2:
 ### Enable IP Forwarding: 
 Enable IP forwarding on the router, allowing it to route packets between the client and the simulated public network.
