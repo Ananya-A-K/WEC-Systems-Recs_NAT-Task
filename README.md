@@ -96,7 +96,7 @@ ip link set veth-internet netns internet
 ip netns exec router ip addr add 192.0.2.1/24 dev veth-router-p
 ip netns exec internet ip addr add 192.0.2.2/24 dev veth-internet
 ip netns exec router ip link set veth-router-p up
-ip netns exec router ip link set veth-internet up
+ip netns exec internet ip link set veth-internet up
 ip netns exec internet ip addr add 192.168.10.1/24 dev lo
 ip netns exec internet ip link set lo up
 ```
