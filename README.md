@@ -157,6 +157,7 @@ A simple web server is hosted using Python's built-in http.server module.
 ```bash
 ip netns exec client python3 -m http.server 80
 ```
+**Note: Port 80 is used here. But if it is running anothre service, any other free port(ex., 8000) maybe used. Also, change to correct port number in the subsequent commnads below as well**
 ### Forward requests to the web server
 ```bash
 ip netns exec router iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.10.2:80
