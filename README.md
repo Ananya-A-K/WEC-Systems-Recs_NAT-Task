@@ -199,7 +199,7 @@ ip netns exec router iptables -A FORWARD -p tcp --dport 80 -j ACCEPT
 ip netns exec router iptables -A FORWARD -p tcp --dport 443 -j ACCEPT
 ip netns exec router iptables -A FORWARD -j DROP
 ```
-## To remove the namespaces and virtual cables/links after completion
+## To remove the namespaces and virtual cables/links
 ```bash
 ip netns del client
 ip netns del router
