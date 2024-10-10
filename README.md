@@ -1,4 +1,6 @@
-# Networking: Creating a NAT(Network Address Translation)
+# NAT(Network Address Translation) Task
+Name: Ananya A K
+Roll No: 231CS208
 ## Tasks completed:
 1. Create a network topology consisting of:
       - Private LAN (192.168.10.0/24): At least one client node.
