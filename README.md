@@ -1,4 +1,4 @@
-# Simple-NAT-implementation
+# Networking: Creating a NAT(Network Address Translation)
 ## Tasks completed:
 1. Create a network topology consisting of:
       - Private LAN (192.168.10.0/24): At least one client node.
