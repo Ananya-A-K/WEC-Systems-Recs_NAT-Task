@@ -48,7 +48,8 @@ To check assignment to specific namespaces
 ip netns exec client ip link list
 ip netns exec router ip link list
 ```
-Note: Running 'ip link list', doesn't show veth-router or veth-client anymore as the have been assigned to their respective namespaces
+Note 1: veth-client@ and veth-router@ must be displayed in the respective namespace lists.<br>
+Note 2: Running 'ip link list', doesn't show veth-router or veth-client anymore as the have been assigned to their respective namespaces
 ### Assign IP Addresses:                                                   
 For the client:                                                                           
 Assign ip to client 
@@ -87,7 +88,7 @@ sudo ip netns exec router ip addr add 192.0.2.1/24 dev lo
 sudo ip netns exec router ip link set lo up
 ```
 -->
-A namespace named "internet" is created with a public ip(198.51.100.0/24) and link is made between the router and internet. Loopback is used to simulate the traffic going through various nodes and finally reaches the router of the internet, finally to be sent to destination router. Public ip of the router is set as 192.0.2.1/24.
+A namespace named "internet" is created with a public ip(192.0.2.2/24) and link is made between the router and internet. Loopback is used to simulate the traffic going through various nodes and finally reaches the router of the internet, finally to be sent to destination router. Public ip of the router is set as 192.0.2.1/24.
 ```bash
 ip netns add internet
 ip link add veth-router-p type veth peer name veth-internet
@@ -100,18 +101,27 @@ ip netns exec internet ip link set veth-internet up
 ip netns exec internet ip addr add 192.168.10.1/24 dev lo
 ip netns exec internet ip link set lo up
 ```
-**(Note: It may give error saying veth-internt device not found sometimes.. I'm still figuring out why. The subsequent commands do run as the link exists but not up and running)** 
+~~:~~
 <br>
-Note: 192.0.2.1/24 and 198.51.100.0/24 are used as public ip for the router as it belongs to the group of ips reserved for documentaion and testig purposes, to avoid confilcts or issues if actual/valid public ips. Alternatively, 198.18.0.0/15 block can be used for the same purpose.
+Note: 192.0.2.1/24 and 192.0.2.2/24 are used as public IPs as it belongs to the group of ips reserved for documentaion and testig purposes, to avoid confilcts or issues with actual/valid public ips. Alternatively, 198.18.0.0/15 block can be used for the same purpose.
 Also, the private ip of the "internet" router is 192.168.10.1/24<br>
 ### Route traffic from client to intenet through the router: 
 Add a route in the client namespace to reach the internet via the router
 ```bash
 ip netns exec client ip route add 192.0.2.0/24 via 192.168.10.1
 ```
+Note: This command is necessary to ensure that the requests from the client namespsce to the "internet" goes through the router. If not, then ping will give the following error- 
+```
+Error:ping: connect: Network is unreachable
+```
 Check if the route is in the client namespace
 ```bash
 ip netns exec client ip route
+```
+Note: The output should look something like-
+```
+192.0.2.0/24 via 192.168.10.1 dev veth-client
+192.168.10.0/24 dev veth-client proto kernel scope link src 192.168.10.2
 ```
 ## TASK2:
 ### Enable IP Forwarding: 
@@ -119,7 +129,7 @@ Enable IP forwarding on the router, allowing it to route packets between the cli
 ```bash
 ip netns exec router sysctl -w net.ipv4.ip_forward=1
 ```
-Alternatively,
+Alternatively, the following command can be used to se
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 ```
@@ -150,6 +160,22 @@ ip netns exec router iptables -A FORWARD -d 192.168.10.2 -j ACCEPT
 ###Ping to test the working or connectivity.
 ```bash
 ip netns exec client ping 192.0.2.1
+```
+Note: **Use Ctrl+C to stop pinging :)**
+The terminal should look something like the following on sucess:
+```
+PING 192.0.2.1 (192.0.2.1) 56(84) bytes of data.
+64 bytes from 192.0.2.1: icmp_seq=1 ttl=64 time=0.075 ms
+64 bytes from 192.0.2.1: icmp_seq=2 ttl=64 time=0.049 ms
+64 bytes from 192.0.2.1: icmp_seq=3 ttl=64 time=0.260 ms
+^C
+--- 192.0.2.1 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2061ms
+rtt min/avg/max/mdev = 0.049/0.128/0.260/0.093 ms
+```
+Alternatively, to send a specific number of packets, -c flag followed by the number of packets can be used.
+```bash
+ip netns exec client ping 192.0.2.1 -c 4
 ```
 ## TASK3:
 ### Host a simple web server (using Python) on the LAN client: 
