@@ -9,6 +9,9 @@
       - Host a simple web server (using Python, Apache, etc.) on the LAN client.
       - Forward requests from the "internet" to the internal web server using the router's public IP.
 4. [Bonus] Restrict outbound traffic from the LAN to allow only HTTP and HTTPS connections.  <br>
+## Topology
+<img src="Topology.png">
+
 ## To run commands as root:
 ```bash
 sudo su
