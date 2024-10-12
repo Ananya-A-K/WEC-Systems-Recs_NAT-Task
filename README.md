@@ -13,7 +13,7 @@ Roll No: 231CS208
       - Forward requests from the "internet" to the internal web server using the router's public IP.
 4. [Bonus] Restrict outbound traffic from the LAN to allow only HTTP and HTTPS connections.  <br>
 ## Topology
-<img src="Topology.png">
+<img src="topology.png">
 
 ## To run commands as root:
 ```bash
@@ -52,6 +52,8 @@ ip link set veth-router netns router
 To check assignment to specific namespaces
 ```bash
 ip netns exec client ip link list
+```
+```bash
 ip netns exec router ip link list
 ```
 Note 1: veth-client@ and veth-router@ must be displayed in the respective namespace lists.<br>
@@ -77,23 +79,7 @@ ip netns exec router ip link set veth-router up
 ```
 <!-- For loopback: ip netns exec client ip link set lo up -->
 ### Create a Simulated Public Network:
-<!--
-Create a virtual cable or link with ends veth-public and veth-router-p(link with router), asign ip and get it up and running
-```bash
-ip link add veth-public type veth peer name veth-router-p
-ip link set veth-router-p netns router
-ip netns exec router ip addr add 203.0.113.1/24 dev veth-router-p
-ip netns exec router ip link set veth-router-p up
-ip link set veth-public up
-```
-(multicast address: 203.0.113.1/24 is used to simulate public internet)
--->
-<!--Loopback on the router namspace is used simulate the internet/public network, using public ip 192.0.2.1/24 for the router.
-```bash
-sudo ip netns exec router ip addr add 192.0.2.1/24 dev lo
-sudo ip netns exec router ip link set lo up
-```
--->
+
 A namespace named "internet" is created with a public ip(192.0.2.2/24) and link is made between the router and internet. Loopback is used to simulate the traffic going through various nodes and finally reaches the router of the internet, finally to be sent to destination router. Public ip of the router is set as 192.0.2.1/24.
 ```bash
 ip netns add internet
@@ -104,14 +90,16 @@ ip netns exec router ip addr add 192.0.2.1/24 dev veth-router-p
 ip netns exec internet ip addr add 192.0.2.2/24 dev veth-internet
 ip netns exec router ip link set veth-router-p up
 ip netns exec internet ip link set veth-internet up
-ip netns exec internet ip addr add 192.168.10.1/24 dev lo
+ip netns exec internet ip addr add 192.168.10.4/24 dev lo
 ip netns exec internet ip link set lo up
 ```
 ~~:~~
 <br>
-Note: 192.0.2.1/24 and 192.0.2.2/24 are used as public IPs as it belongs to the group(192.0.2.0/24) of ips reserved for documentaion and testig purposes, to avoid confilcts or issues with actual/valid public ips.<br>
-(Alternatively, 198.51.100.0/24 block can be used for the same purpose. Source: )
-Also, the private ip of the "internet" router is 192.168.10.1/24<br>
+Note:
+Lopback on "internet" router is used to simulate the internet. This is done because whenever<br>
+a request is sent to a server using ip, data packets are obtained through that same router(here "internet" roueter.<br>
+The data maybe present in that server itself or needs to be fetched from other server(s).<br>
+We can abstract these parts for the "simualated internet" using loopback.
 ### Route traffic from client to intenet through the router: 
 Add a route in the client namespace to reach the internet via the router
 ```bash
