@@ -109,7 +109,8 @@ ip netns exec internet ip link set lo up
 ```
 ~~:~~
 <br>
-Note: 192.0.2.1/24 and 192.0.2.2/24 are used as public IPs as it belongs to the group of ips reserved for documentaion and testig purposes, to avoid confilcts or issues with actual/valid public ips. Alternatively, 198.18.0.0/15 block can be used for the same purpose.
+Note: 192.0.2.1/24 and 192.0.2.2/24 are used as public IPs as it belongs to the group(192.0.2.0/24) of ips reserved for documentaion and testig purposes, to avoid confilcts or issues with actual/valid public ips.<br>
+(Alternatively, 198.51.100.0/24 block can be used for the same purpose. Source: )
 Also, the private ip of the "internet" router is 192.168.10.1/24<br>
 ### Route traffic from client to intenet through the router: 
 Add a route in the client namespace to reach the internet via the router
