@@ -97,7 +97,7 @@ ip netns exec internet ip link set lo up
 <br>
 Note:
 Lopback on "internet" router is used to simulate the internet. This is done because whenever<br>
-a request is sent to a server using ip, data packets are obtained through that same router(here "internet" roueter.<br>
+a request is sent to a server, data packets are obtained back through that same server(here "internet" router).<br>
 The data maybe present in that server itself or needs to be fetched from other server(s).<br>
 We can abstract these parts for the "simualated internet" using loopback.
 ### Route traffic from client to intenet through the router: 
@@ -142,35 +142,25 @@ Sets up a NAT rule in the router namespace that will perform IP Masquerade on pa
 ```bash
 ip netns exec router iptables -t nat -A POSTROUTING -o veth-router-p -j MASQUERADE
 ```
-<!--
-NAT for incoming traffic to reach the right namespace
-```bash
-ip netns exec router iptables -t nat -A PREROUTING -i veth-router-p -j ACCEPT
-```
-Router forwards the traffic to the destination namespace
-```bash
-ip netns exec router iptables -A FORWARD -d 192.168.10.2 -j ACCEPT
-```
--->
 ###Ping to test the working or connectivity.
 ```bash
-ip netns exec client ping 192.0.2.1
+ip netns exec client ping 192.0.2.2
 ```
-Note: **Use Ctrl+C to stop pinging :)**
+Note: **Use Ctrl+C to stop pinging :)** <br>
 The terminal should look something like the following on sucess:
 ```
-PING 192.0.2.1 (192.0.2.1) 56(84) bytes of data.
-64 bytes from 192.0.2.1: icmp_seq=1 ttl=64 time=0.075 ms
-64 bytes from 192.0.2.1: icmp_seq=2 ttl=64 time=0.049 ms
-64 bytes from 192.0.2.1: icmp_seq=3 ttl=64 time=0.260 ms
+PING 192.0.2.2 (192.0.2.2) 56(84) bytes of data.
+64 bytes from 192.0.2.2: icmp_seq=1 ttl=63 time=0.118 ms
+64 bytes from 192.0.2.2: icmp_seq=2 ttl=63 time=0.069 ms
+64 bytes from 192.0.2.2: icmp_seq=3 ttl=63 time=0.065 ms
 ^C
---- 192.0.2.1 ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2061ms
-rtt min/avg/max/mdev = 0.049/0.128/0.260/0.093 ms
+--- 192.0.2.2 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2030ms
+rtt min/avg/max/mdev = 0.065/0.084/0.118/0.024 ms
 ```
 Alternatively, to send a specific number of packets, -c flag followed by the number of packets can be used.
 ```bash
-ip netns exec client ping 192.0.2.1 -c 4
+ip netns exec client ping 192.0.2.2 -c 4
 ```
 ## TASK3:
 ### Host a simple web server (using Python) on the LAN client: 
